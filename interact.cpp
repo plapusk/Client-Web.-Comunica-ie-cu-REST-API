@@ -130,7 +130,7 @@ void Interact::enter_library() {
 	switch (code) {
 		case CODE_SUC1:
 			token = "Bearer " + jsonVal["token"].get<string>();
-			printf("Success\n");
+			printf("Success, Token: %s\n", token.c_str());
 			break;
 
 		default:
