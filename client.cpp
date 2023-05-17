@@ -28,26 +28,36 @@ int main(int argc, const char** argv) {
 				continue;
 			}
 			in.enter_library();
+		} else if (!strcmp(buf, "add_book")) {
+			if (!in.hasToken()) {
+				printf("Enter library first\n");
+				continue;
+			}
+			in.add_book();
+		} else if (!strcmp(buf, "get_books")) {
+			if (!in.hasToken()) {
+				printf("Enter library first\n");
+				continue;
+			}
+			in.get_books();
 		} else if (!strcmp(buf, "get_book")) {
 			if (!in.hasToken()) {
 				printf("Enter library first\n");
 				continue;
 			}
-		} else if (!strcmp(buf, "add_books")) {
-			if (!in.hasToken()) {
-				printf("Enter library first\n");
-				continue;
-			}
+			in.get_book();
 		} else if (!strcmp(buf, "delete_book")) {
 			if (!in.hasToken()) {
 				printf("Enter library first\n");
 				continue;
 			}
+			in.delete_book();
 		} else if (!strcmp(buf, "logout")) {
 			if (!in.isCookieActive()) {
 				printf("Login first\n");
 				continue;
 			}
+			in.logout();
 		} else {
 			printf("Learn to write!\n");
 		}

@@ -11,9 +11,9 @@ bool Interact::hasToken() {
 void Interact::reg_user() {
 	string user, pass;
 	getline(cin, user, '\n');
-	printf("user=");
+	printf("user = ");
 	getline(cin, user, '\n');
-	printf("password=");
+	printf("password = ");
 	getline(cin, pass, '\n');
 
 	fd = open_connection((char *)HOST, PORT, AF_INET, SOCK_STREAM, 0);
@@ -61,9 +61,9 @@ void Interact::reg_user() {
 void Interact::login() {
 	string user, pass;
 	getline(cin, user, '\n');
-	printf("user=");
+	printf("user = ");
 	getline(cin, user, '\n');
-	printf("password=");
+	printf("password = ");
 	getline(cin, pass, '\n');
 
 	fd = open_connection((char *)HOST, PORT, AF_INET, SOCK_STREAM, 0);
@@ -79,7 +79,7 @@ void Interact::login() {
 	char *message = compute_post_request(HOST, LOGIN, "application/json", false, NULL, reg_string.c_str(), NULL, 0);
 	send_to_server(fd, message);
 	char *response = receive_from_server(fd);
-	char *copy;
+	char copy[BUFSIZ];
 	strcpy(copy, response);
 
 	int code = getCode(response);
@@ -114,13 +114,14 @@ void Interact::login() {
 void Interact::enter_library() {
 	fd = open_connection((char *)HOST, PORT, AF_INET, SOCK_STREAM, 0);
 
-	char **cookies;
+	char **cookies = (char**)malloc(1 * sizeof(char*));
+	cookies[0] = (char *)malloc(BUFSIZ);
 	strcpy(cookies[0], cookie.c_str());
 
 	char *message = compute_get_request((char *)HOST, ACCESS, NULL, false, NULL, cookies, 1);
 	send_to_server(fd, message);
 	char *response = receive_from_server(fd);
-	char *copy;
+	char copy[BUFSIZ];
 	strcpy(copy, response);
 	int code = getCode(response);
 
@@ -137,6 +138,165 @@ void Interact::enter_library() {
 			break;
 	}
 
+	free(cookies[0]);
+	free(cookies);
+	close_connection(fd);
+}
+
+void Interact::add_book() {
+	string title, author, genre, publisher, page_count;
+	getline(cin, title, '\n');
+	cout << "Title = "; 
+	getline(cin, title, '\n');
+	cout << "Author = "; 
+	getline(cin, author, '\n');
+	cout << "Genre = "; 
+	getline(cin, genre, '\n');
+	cout << "Publisher = "; 
+	getline(cin, publisher, '\n');
+	cout << "Page count = ";
+	getline(cin, page_count, '\n');
+	int page_nr = atoi(page_count.c_str());
+	if (page_nr < 0) {
+		printf("Try positive\n");
+		return;
+	}
+
+	fd = open_connection((char *)HOST, PORT, AF_INET, SOCK_STREAM, 0);
+
+	json book = {
+		{ "title", title },
+		{ "author", author },
+		{ "genre", genre },
+		{ "publisher", publisher },
+		{ "page_count", page_nr }
+	};
+
+	string payload = book.dump();
+	char *message = compute_post_request(HOST, ADD_BOOK, "application/json", true, token.c_str(), payload.c_str(), NULL, 0);
+	send_to_server(fd, message);
+	char *response = receive_from_server(fd);
+	int code = getCode(response);
+
+	switch (code) {
+		case CODE_SUC1:
+			printf("Success\n");
+			break;
+
+		default:
+			printf("error\n");
+			break;
+	}
+
+	close_connection(fd);
+}
+
+void Interact::get_book() {
+	fd = open_connection((char *)HOST, PORT, AF_INET, SOCK_STREAM, 0);
+	int id;
+	printf("id = ");
+	scanf("%d", &id);
+
+	string book_path = string(ADD_BOOK) + string("/") + to_string(id);
+
+	char *message = compute_get_request(HOST, book_path.c_str(), NULL, true, token.c_str(), NULL, 0);
+	send_to_server(fd, message);
+	char *response = receive_from_server(fd);
+	char copy[BUFSIZ];
+	strcpy(copy, response);
+
+	int code = getCode(response);
+
+	switch (code) {
+		case CODE_SUC1:
+			printf("%s\n", basic_extract_json_response(copy));
+			break;
+
+		default:
+			printf("error\n");
+			break;
+	}
+	close_connection(fd);
+}
+
+void Interact::get_books() {
+	fd = open_connection((char *)HOST, PORT, AF_INET, SOCK_STREAM, 0);
+	char *message = compute_get_request(HOST, ADD_BOOK, NULL, true, token.c_str(), NULL, 0);
+	send_to_server(fd, message);
+	char *response = receive_from_server(fd);
+	char copy[BUFSIZ];
+	strcpy(copy, response);
+
+	int code = getCode(response);
+	char *bookList;
+	switch (code) {
+		case CODE_SUC1:
+			bookList = basic_extract_json_response(copy);
+			if (bookList == NULL) {
+				printf("No books\n");
+				break;
+			}
+			printf("[%s\n", bookList);
+			break;
+
+		default:
+			printf("error\n");
+			break;
+	}
+	close_connection(fd);
+}
+
+void Interact::delete_book() {
+	fd = open_connection((char *)HOST, PORT, AF_INET, SOCK_STREAM, 0);
+	int id;
+	printf("id = ");
+	scanf("%d", &id);
+
+	string book_path = string(ADD_BOOK) + string("/") + to_string(id);
+	char *message = compute_delete_request(HOST, book_path.c_str(), NULL, true, token.c_str(), NULL, 0);
+	send_to_server(fd, message);
+	char *response = receive_from_server(fd);
+
+	int code = getCode(response);
+
+	switch (code) {
+		case CODE_SUC1:
+			printf("Deleted\n");
+			break;
+
+		default:
+			printf("error\n");
+			break;
+	}
+	close_connection(fd);
+}
+
+void Interact::logout() {
+	fd = open_connection((char *)HOST, PORT, AF_INET, SOCK_STREAM, 0);
+
+	char **cookies = (char**)malloc(1 * sizeof(char*));
+	cookies[0] = (char *)malloc(BUFSIZ);
+	strcpy(cookies[0], cookie.c_str());
+
+	char *message = compute_get_request(HOST, LOGOUT, NULL, false, NULL, cookies, 1);
+	send_to_server(fd, message);
+	char *response = receive_from_server(fd);
+
+	int code = getCode(response);
+	switch (code) {
+		case CODE_SUC1:
+			printf("Succes get out\n");
+			break;
+
+		default:
+			printf("error\n");
+			break;
+	}
+	token.clear();
+	cookie.clear();
+
+	free(cookies[0]);
+	free(cookies);
 	close_connection(fd);
 }
 

@@ -17,6 +17,8 @@ using json = nlohmann::json;
 #define REGISTER "/api/v1/tema/auth/register"
 #define LOGIN "/api/v1/tema/auth/login"
 #define ACCESS "/api/v1/tema/library/access"
+#define ADD_BOOK "/api/v1/tema/library/books"
+#define LOGOUT "/api/v1/tema/auth/logout"
 
 #define CODE_SUC1 200
 #define CODE_SUC2 201
@@ -31,6 +33,11 @@ public:
 	void login();
 	void get_new_cookie(char *buf);
 	void enter_library();
+	void add_book();
+	void get_books();
+	void get_book();
+	void delete_book();
+	void logout();
 
 	int getCode(char *buf);
 	void closing();
