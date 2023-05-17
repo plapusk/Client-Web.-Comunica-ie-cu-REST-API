@@ -2,16 +2,56 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <netdb.h>
-#include <arpa/inet.h>
-#include "helpers.hpp"
-#include "requests.hpp"
+#include "interact.hpp"
 #include <bits/stdc++.h>
 #include "nlohmann/json.hpp"
 using namespace std;
 
 int main(int argc, const char** argv) {
-    return 0;
+	char buf[BUFSIZ];
+	bool isDone = false;
+	Interact in;
+
+	while (!isDone) {
+		printf("> ");
+		scanf(" %s", buf);
+		if (!strcmp(buf, "exit")) {
+			in.closing();
+			isDone  = true;
+		} else if (!strcmp(buf, "register")) {
+			in.reg_user();
+		} else if (!strcmp(buf, "login")) {
+			in.login();
+		} else if (!strcmp(buf, "enter_library")) {
+			if (!in.isCookieActive()) {
+				printf("Login first\n");
+				continue;
+			}
+			in.enter_library();
+		} else if (!strcmp(buf, "get_book")) {
+			if (!in.hasToken()) {
+				printf("Enter library first\n");
+				continue;
+			}
+		} else if (!strcmp(buf, "add_books")) {
+			if (!in.hasToken()) {
+				printf("Enter library first\n");
+				continue;
+			}
+		} else if (!strcmp(buf, "delete_book")) {
+			if (!in.hasToken()) {
+				printf("Enter library first\n");
+				continue;
+			}
+		} else if (!strcmp(buf, "logout")) {
+			if (!in.isCookieActive()) {
+				printf("Login first\n");
+				continue;
+			}
+		} else {
+			printf("Learn to write!\n");
+		}
+	}
+	printf("Closed\n");
+	return 0;
 }
