@@ -1,0 +1,88 @@
+Costescu Matei 323CA
+matei.costescu@stud.acs.upb.ro
+
+Tema 4 PCOM
+
+General description:
+
+For this homework we had to implement a client that interacts with a server
+using the https protocols.
+
+Personal note:
+
+Most of the "hard" part was already implemented in the skel for the http
+laboratory, so what actually reamins to implement for this homework is to
+read commands, parse buffers and make json objects. The http protocols are
+simply calling the functions, which are already implemented.
+
+CLIENT:
+
+Now for the actual client it's still pretty easy, we read a buffer inside a
+loop and see if we get any of the following commands
+
+-register
+
+We first read the user and the password. After that we make a json file and
+convert it to a string. Then we use the compute_post_requset to get a message
+that we send to server. After that we get a response to see if we managed to
+register succesfully.
+
+-login 
+
+We first read the user and the password. After that we make a json file and
+convert it to a string. Then we use the compute_post_requset to get a message
+that we send to server. After that we get a response to see if we managed to
+login succesfully. Additionaly we memorize the cookie from the response if we
+managed to login.
+
+-enter_library
+
+First we have to check if we are logged in. If yes, we get the current cookie
+into the proper structure (a char **), so we declare a double pointer and
+allocate memory and copy the current cookie inside it. Than we can proceed
+normally with the compute_get_requst for the message, send said message to the
+server. Get a response that contains a token for the library we entered. And
+if the response does not contain an error message we memorize said token. We
+also make sure to free memory
+
+-add_book
+
+First we have to check if we have entered a library. Then we read everything
+that we need to memorize about the book. After that we make a json file and
+convert it to a string. Then we use the compute_post_requset to get a message
+that we send to server. After that we get a response to see if we managed to
+add the book succesfully.
+
+-get_books
+
+First we have to check if we have entered a library. We can proceed directly
+with compute_get_requset to get the message, send message to server using the
+file descriptor, get the response to see if everything went fine. If yes we
+can the book list from the response. Check if we have no books otherwise print
+normally.
+
+-get_book
+
+Get book is exactly the same as get_books but we first need to get an ID and
+give the path of the exact the ID instead of the path to the entire folder.
+Than we can procced normally giving the compute_get_request this new path.
+
+-delete_book
+
+First we have to check if we have entered a library. Than read the ID of the
+card we want to delete. Again get the path of this exact book. Then we procced
+normally, but it's the only time we use compute_delete_message for getting the
+message. Otherwise the same send to server and get response for checking
+errors. 
+
+-logout
+
+First we check if we are logged in. We have to redo the procedure from the
+enter_library for copying the cookie. Then simply procced with
+compute_get_request to get a message, send it to server, get the response to
+see if there were any errors. If not, we can proceed to clear our local cookie
+and token because we don't need them anymore.
+
+-exit
+
+Just end the loop of reading commands.

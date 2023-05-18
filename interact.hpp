@@ -31,7 +31,6 @@ public:
 	bool hasToken();
 	void reg_user();
 	void login();
-	void get_new_cookie(char *buf);
 	void enter_library();
 	void add_book();
 	void get_books();
@@ -39,8 +38,8 @@ public:
 	void delete_book();
 	void logout();
 
+	void get_new_cookie(char *buf);
 	int getCode(char *buf);
-	void closing();
 private:
 	int fd;
 	string token;
